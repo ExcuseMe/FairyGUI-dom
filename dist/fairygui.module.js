@@ -17039,22 +17039,24 @@ class Stage extends UIElement {
         this._window = ownerWindow;
         ownerWindow.fguiStage = this;
         let doc = ownerWindow.document;
-        doc.body.appendChild(this);
+        let container = doc.getElementsByClassName("fgui-container")[0];
+        (container || doc.body).appendChild(this);
         this._touchscreen = ('ontouchstart' in ownerWindow) ||
             (navigator.maxTouchPoints > 0) ||
             (navigator.msMaxTouchPoints > 0);
         this._electron = window && window.process && window.process.versions['electron'] != undefined;
         for (let i = 0; i < maxPointer; i++)
             this._pointers.push(new PointerInfo());
-        doc.addEventListener('pointerdown', ev => this.handlePointer(ev, 0), { passive: false });
-        doc.addEventListener('pointerup', ev => this.handlePointer(ev, 1), { passive: false });
-        doc.addEventListener('pointermove', ev => this.handlePointer(ev, 2), { passive: false });
-        doc.addEventListener('pointercancel', ev => this.handlePointer(ev, 3), { passive: false });
-        doc.addEventListener('pointerleave', ev => this.handlePointer(ev, 3), { passive: false });
-        doc.addEventListener('contextmenu', ev => this.handleContextMenu(ev));
-        doc.addEventListener('dragend', ev => this.handlePointer(ev, 1), { passive: false });
-        doc.addEventListener('dragover', ev => this.handlePointer(ev, 2), { passive: false });
-        doc.addEventListener('wheel', ev => this.handleWheel(ev), { passive: false });
+        let target = (container || doc);
+        target.addEventListener('pointerdown', ev => this.handlePointer(ev, 0), { passive: false });
+        target.addEventListener('pointerup', ev => this.handlePointer(ev, 1), { passive: false });
+        target.addEventListener('pointermove', ev => this.handlePointer(ev, 2), { passive: false });
+        target.addEventListener('pointercancel', ev => this.handlePointer(ev, 3), { passive: false });
+        target.addEventListener('pointerleave', ev => this.handlePointer(ev, 3), { passive: false });
+        target.addEventListener('contextmenu', ev => this.handleContextMenu(ev));
+        target.addEventListener('dragend', ev => this.handlePointer(ev, 1), { passive: false });
+        target.addEventListener('dragover', ev => this.handlePointer(ev, 2), { passive: false });
+        target.addEventListener('wheel', ev => this.handleWheel(ev), { passive: false });
         doc.body.insertAdjacentHTML("afterbegin", `<style>
             .fgui-link { color:#3A67CC }
             .fgui-link:hover { color:#3A67CC }
@@ -17116,8 +17118,9 @@ class Stage extends UIElement {
             }
         </style>`);
         this.className = "fgui-stage";
-        ownerWindow.addEventListener('keydown', this.onKeydown.bind(this));
-        ownerWindow.addEventListener('keyup', this.onKeyup.bind(this));
+        target = (container || ownerWindow);
+        target.addEventListener('keydown', ev => this.onKeydown(ev));
+        target.addEventListener('keyup', ev => this.onKeyup(ev));
         ownerWindow.requestAnimationFrame(this.checkNextFocus.bind(this));
     }
     get window() {
